@@ -48,7 +48,7 @@ def draw(draw_info, algo_name, ascending):
     controls = draw_info.FONT.render("R - Reset | SPACE - Start Sorting | A - Ascending | D - Descending", 1, draw_info.BLACK)
     draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2, 45))
     # change when adding more sorting algorithms
-    sorting = draw_info.LARGE_FONT.render("I - Insertion Sort | B - Bubble Sort", 1, draw_info.BLACK)
+    sorting = draw_info.LARGE_FONT.render("I - Insertion Sort | B - Bubble Sort | H - Heap Sort ", 1, draw_info.BLACK)
     draw_info.window.blit(sorting, (draw_info.width/2 - sorting.get_width()/2, 75))
 
     draw_list(draw_info)
@@ -122,6 +122,41 @@ def insertion_sort(draw_info, ascending=True):
 
     return lst
 
+def heap_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+
+    def heapify(lst, n, i):
+        largest_smallest = i
+        left = 2 * i + 1
+        right = 2 * i + 2
+
+        if left < n and ((lst[left] > lst[largest_smallest] and ascending) or (lst[left] < lst[largest_smallest] and not ascending)):
+            largest_smallest = left
+
+        if right < n and ((lst[right] > lst[largest_smallest] and ascending) or (lst[right] < lst[largest_smallest] and not ascending)):
+            largest_smallest = right
+
+        if largest_smallest != i:
+            lst[i], lst[largest_smallest] = lst[largest_smallest], lst[i]
+            draw_list(draw_info, {i: draw_info.GREEN, largest_smallest: draw_info.RED}, True)
+            pygame.time.delay(10)
+            yield True
+            yield from heapify(lst, n, largest_smallest)
+
+    n = len(lst)
+
+    for i in range(n // 2 - 1, -1, -1):
+        yield from heapify(lst, n, i)
+
+    for i in range(n - 1, 0, -1):
+        lst[i], lst[0] = lst[0], lst[i]
+        draw_list(draw_info, {i: draw_info.GREEN, 0: draw_info.RED}, True)
+        pygame.time.delay(10)
+        yield True
+        yield from heapify(lst, i, 0)
+
+    return lst
+
 def main():
     run = True
     clock = pygame.time.Clock()
@@ -176,6 +211,9 @@ def main():
             elif event.key == pygame.K_b and not sorting:
                 sorting_algorithm = bubble_sort
                 sorting_algo_name = "Bubble Sort"
+            elif event.key == pygame.K_h and not sorting:
+                sorting_algorithm = heap_sort
+                sorting_algo_name = "Heap Sort"
 
 
     pygame.quit()
@@ -183,5 +221,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
